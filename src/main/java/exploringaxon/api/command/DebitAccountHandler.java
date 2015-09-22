@@ -1,23 +1,20 @@
 package exploringaxon.api.command;
 
-import org.axonframework.commandhandling.CommandHandler;
 import org.axonframework.commandhandling.CommandMessage;
-import org.axonframework.unitofwork.UnitOfWork;
+import org.axonframework.commandhandling.annotation.CommandHandler;
+import org.springframework.stereotype.Component;
 
 /**
  * Created by Dadepo Aderemi.
  */
-public class DebitAccountHandler implements CommandHandler {
+@Component
+public class DebitAccountHandler {
 
-    @Override
-    public Object handle(CommandMessage commandMessage, UnitOfWork unitOfWork) throws Throwable {
-        DebitAccount debitAccountCommand = (DebitAccount) commandMessage.getPayload();
-        String account = debitAccountCommand.getAccount();
-        Double amount = debitAccountCommand.getAmount();
+    @CommandHandler
+    public void handle(DebitAccount debitAccountCommand, CommandMessage<DebitAccount> message){
+
         System.out.println("I can handle the debitAccount command: "
-                                   + "Account to debit: " + account
-                                   + " Amount to debit with: "+ amount);
-
-        return null;
+                                   + "Account to debit: " + debitAccountCommand.getAccount()
+                                   + " Amount to debit with: "+ debitAccountCommand.getAmount());
     }
 }

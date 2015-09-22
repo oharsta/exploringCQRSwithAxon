@@ -1,7 +1,5 @@
 package exploringaxon;
 
-import exploringaxon.api.command.DebitAccount;
-import exploringaxon.api.command.DebitAccountHandler;
 import org.axonframework.commandhandling.SimpleCommandBus;
 import org.axonframework.commandhandling.annotation.AnnotationCommandHandlerBeanPostProcessor;
 import org.axonframework.commandhandling.gateway.DefaultCommandGateway;
@@ -17,8 +15,6 @@ public class AppConfiguration {
     @Bean
     public SimpleCommandBus commandBus() {
         SimpleCommandBus simpleCommandBus = new SimpleCommandBus();
-        // This manually subscribes the command handler: DebitAccountHandler to the commandbus
-        simpleCommandBus.subscribe(DebitAccount.class.getName(), new DebitAccountHandler());
         return simpleCommandBus;
     }
 
