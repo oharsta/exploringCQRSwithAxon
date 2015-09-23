@@ -3,12 +3,12 @@ package exploringaxon.api.command;
 /**
  * Created by Dadepo Aderemi.
  */
-public class DebitAccount {
+public class DebitAccountCommand {
 
     private final String account;
     private final Double amount;
 
-    public DebitAccount(String account, Double amount) {
+    public DebitAccountCommand(String account, Double amount) {
         this.account = account;
         this.amount = amount;
     }

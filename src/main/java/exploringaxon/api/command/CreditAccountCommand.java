@@ -3,12 +3,12 @@ package exploringaxon.api.command;
 /**
  * Created by Dadepo Aderemi.
  */
-public class CreditAccount {
+public class CreditAccountCommand {
 
     private final String account;
     private final Double amount;
 
-    public CreditAccount(String account, Double amount) {
+    public CreditAccountCommand(String account, Double amount) {
         this.account = account;
         this.amount = amount;
     }

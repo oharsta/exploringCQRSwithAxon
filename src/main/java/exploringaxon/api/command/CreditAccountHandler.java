@@ -10,10 +10,10 @@ import org.springframework.stereotype.Component;
 public class CreditAccountHandler {
 
     @CommandHandler
-    public void handle(CreditAccount creditAccountCommand){
+    public void handle(CreditAccountCommand creditAccountCommandCommand){
 
         System.out.println("I can handle the creditAccount command: "
-                                   + "Account to credit: " + creditAccountCommand.getAccount()
-                                   + " Amount to credit with: "+ creditAccountCommand.getAmount());
+                                   + "Account to credit: " + creditAccountCommandCommand.getAccount()
+                                   + " Amount to credit with: "+ creditAccountCommandCommand.getAmount());
     }
 }

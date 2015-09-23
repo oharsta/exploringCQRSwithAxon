@@ -11,10 +11,10 @@ import org.springframework.stereotype.Component;
 public class DebitAccountHandler {
 
     @CommandHandler
-    public void handle(DebitAccount debitAccountCommand, CommandMessage<DebitAccount> message){
+    public void handle(DebitAccountCommand debitAccountCommandCommand, CommandMessage<DebitAccountCommand> message){
 
         System.out.println("I can handle the debitAccount command: "
-                                   + "Account to debit: " + debitAccountCommand.getAccount()
-                                   + " Amount to debit with: "+ debitAccountCommand.getAmount());
+                                   + "Account to debit: " + debitAccountCommandCommand.getAccount()
+                                   + " Amount to debit with: "+ debitAccountCommandCommand.getAmount());
     }
 }

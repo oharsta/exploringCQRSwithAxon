@@ -1,7 +1,7 @@
 package exploringaxon.web;
 
-import exploringaxon.api.command.CreditAccount;
-import exploringaxon.api.command.DebitAccount;
+import exploringaxon.api.command.CreditAccountCommand;
+import exploringaxon.api.command.DebitAccountCommand;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -29,14 +29,14 @@ public class IndexController {
     @RequestMapping("/debit")
     @ResponseBody
     public void doDebit(@RequestParam("acc") String accountNumber, @RequestParam("amount") double amount) {
-        DebitAccount debitAccountCommand = new DebitAccount(accountNumber, amount);
-        commandGateway.send(debitAccountCommand);
+        DebitAccountCommand debitAccountCommandCommand = new DebitAccountCommand(accountNumber, amount);
+        commandGateway.send(debitAccountCommandCommand);
     }
 
     @RequestMapping("/credit")
     @ResponseBody
     public void doCredit(@RequestParam("acc") String accountNumber, @RequestParam("amount") double amount) {
-        CreditAccount creditAccountCommand = new CreditAccount(accountNumber, amount);
-        commandGateway.send(creditAccountCommand);
+        CreditAccountCommand creditAccountCommandCommand = new CreditAccountCommand(accountNumber, amount);
+        commandGateway.send(creditAccountCommandCommand);
     }
 }
