@@ -1,0 +1,1 @@
+Accompanying application to series of post on exploring CQRS with AxonFramework.
