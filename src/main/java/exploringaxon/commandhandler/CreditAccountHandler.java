@@ -14,8 +14,12 @@ import org.springframework.stereotype.Component;
 @Component
 public class CreditAccountHandler {
 
-    @Autowired
     private Repository repository;
+
+    @Autowired
+    public CreditAccountHandler(Repository repository) {
+        this.repository = repository;
+    }
 
     @CommandHandler
     public void handle(CreditAccountCommand creditAccountCommandCommand){

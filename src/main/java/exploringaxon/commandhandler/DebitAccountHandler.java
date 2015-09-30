@@ -13,8 +13,12 @@ import org.springframework.stereotype.Component;
 @Component
 public class DebitAccountHandler {
 
-    @Autowired
     private Repository repository;
+
+    @Autowired
+    public DebitAccountHandler(Repository repository) {
+        this.repository = repository;
+    }
 
     @CommandHandler
     public void handle(DebitAccountCommand debitAccountCommandCommand){
