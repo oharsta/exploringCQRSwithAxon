@@ -1,32 +1,36 @@
 package exploringaxon.model;
 
+import exploringaxon.api.event.AccountCreatedEvent;
 import exploringaxon.api.event.AccountCreditedEvent;
 import exploringaxon.api.event.AccountDebitedEvent;
-import org.axonframework.domain.AbstractAggregateRoot;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import org.axonframework.eventsourcing.annotation.AbstractAnnotatedAggregateRoot;
+import org.axonframework.eventsourcing.annotation.AggregateIdentifier;
+import org.axonframework.eventsourcing.annotation.EventSourcingHandler;
 
 /**
  * Entity that models the Account
  *
  * Created by Dadepo Aderemi.
  */
-@Entity
-public class Account extends AbstractAggregateRoot {
 
-    @Id
-    private String id;
+public class Account extends AbstractAnnotatedAggregateRoot {
+    private static final long serialVersionUID = 8723320580782813954L;
 
-    @Column
+    @AggregateIdentifier
+    private String accountNo;
+
     private Double balance;
 
     public Account() {
     }
 
-    public Account(String id) {
-        this.id = id;
+    public Account(String accountNo) {
+        apply(new AccountCreatedEvent(accountNo));
+    }
+
+    @EventSourcingHandler
+    public void applyAccountCreation(AccountCreatedEvent event) {
+        this.accountNo = event.getAccountNo();
         this.balance = 0.0d;
     }
 
@@ -40,22 +44,27 @@ public class Account extends AbstractAggregateRoot {
 
         if (Double.compare(debitAmount, 0.0d) > 0 &&
                 this.balance - debitAmount > -1) {
-            this.balance -= debitAmount;
-
             /**
-             * A change in state of the Account has occurred which can be represented by an to an event: i.e.
-             * the account has been debited so an AccountDebitedEvent is created and registered.
+             * Instead of changing the state directly we apply an event
+             * that conveys what happened.
              *
-             * When the repository stores this change in state, it will also publish the AccountDebitedEvent
-             * to the outside world.
+             * The event thus applied is stored.
              */
-            AccountDebitedEvent accountDebitedEvent = new AccountDebitedEvent(this.id, debitAmount, this.balance);
-            registerEvent(accountDebitedEvent);
-
+            apply(new AccountDebitedEvent(this.accountNo, debitAmount, this.balance));
         } else {
             throw new IllegalArgumentException("Cannot debit with the amount");
         }
 
+    }
+
+    @EventSourcingHandler
+    private void applyDebit(AccountDebitedEvent event) {
+        /**
+         * This method is called as a reflection of applying events stored in the event store.
+         * Consequent application of all the events in the event store will bring the Account
+         * to the most recent state.
+         */
+        this.balance -= event.getAmountDebited();
     }
 
     /**
@@ -67,20 +76,26 @@ public class Account extends AbstractAggregateRoot {
     public void credit(Double creditAmount) {
         if (Double.compare(creditAmount, 0.0d) > 0 &&
                 Double.compare(creditAmount, 1000000) < 0) {
-            this.balance += creditAmount;
-
             /**
-             * A change in state of the Account has occurred which can be represented by an to an event: i.e.
-             * the account has been credited so an AccountCreditedEvent is created and registered.
+             * Instead of changing the state directly we apply an event
+             * that conveys what happened.
              *
-             * When the repository stores this change in state, it will also publish the AccountCreditedEvent
-             * to the outside world.
+             * The event thus applied is stored.
              */
-            AccountCreditedEvent accountCreditedEvent = new AccountCreditedEvent(this.id, creditAmount, this.balance);
-            registerEvent(accountCreditedEvent);
+            apply(new AccountCreditedEvent(this.accountNo, creditAmount, this.balance));
         } else {
             throw new IllegalArgumentException("Cannot credit with the amount");
         }
+    }
+
+    @EventSourcingHandler
+    private void applyCredit(AccountCreditedEvent event) {
+        /**
+         * This method is called as a reflection of applying events stored in the event store.
+         * Consequent application of all the events in the event store will bring the Account
+         * to the most recent state.
+         */
+        this.balance += event.getAmountCredited();
     }
 
     public Double getBalance() {
@@ -88,11 +103,11 @@ public class Account extends AbstractAggregateRoot {
     }
 
     public void setIdentifier(String id) {
-        this.id = id;
+        this.accountNo = id;
     }
 
     @Override
     public Object getIdentifier() {
-        return id;
+        return accountNo;
     }
 }

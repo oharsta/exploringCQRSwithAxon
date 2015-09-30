@@ -4,24 +4,22 @@ import exploringaxon.model.Account;
 import org.axonframework.commandhandling.SimpleCommandBus;
 import org.axonframework.commandhandling.annotation.AnnotationCommandHandlerBeanPostProcessor;
 import org.axonframework.commandhandling.gateway.DefaultCommandGateway;
-import org.axonframework.common.jpa.SimpleEntityManagerProvider;
 import org.axonframework.eventhandling.SimpleEventBus;
 import org.axonframework.eventhandling.annotation.AnnotationEventListenerBeanPostProcessor;
-import org.axonframework.repository.GenericJpaRepository;
+import org.axonframework.eventsourcing.EventSourcingRepository;
+import org.axonframework.eventstore.EventStore;
+import org.axonframework.eventstore.fs.FileSystemEventStore;
+import org.axonframework.eventstore.fs.SimpleEventFileResolver;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
+import java.io.File;
 
 /**
  * Created by Dadepo Aderemi.
  */
 @Configuration
 public class AppConfiguration {
-
-    @PersistenceContext
-    private EntityManager entityManager;
 
     @Bean
     public SimpleCommandBus commandBus() {
@@ -68,19 +66,32 @@ public class AppConfiguration {
     }
 
     /**
-     * Configures a GenericJpaRepository as a Spring Bean. The Repository would be used to access
-     * the Account entity.
+     * An event sourcing implementation needs a place to store events. i.e. The event Store.
+     * In our use case we will be storing our events in a file system, so we configure
+     * the FileSystemEventStore as our EventStore implementation
      *
+     * It should be noted that Axon allows storing the events
+     * in other persistent mechanism...jdbc, jpa etc
+     *
+     * @return the {@link EventStore}
      */
     @Bean
-    public GenericJpaRepository genericJpaRepository() {
-        SimpleEntityManagerProvider entityManagerProvider = new SimpleEntityManagerProvider(entityManager);
-        GenericJpaRepository genericJpaRepository = new GenericJpaRepository(entityManagerProvider, Account.class);
-        /**
-         * Configuring the repository with an event bus which allows the repository
-         * to be able to publish domain events
-         */
-        genericJpaRepository.setEventBus(eventBus());
-        return genericJpaRepository;
+    public EventStore eventStore() {
+        EventStore eventStore = new FileSystemEventStore(new SimpleEventFileResolver(new File("./events")));
+        return eventStore;
+    }
+
+    /**
+     * Our aggregate root is now created from stream of events and not from a representation in a persistent mechanism,
+     * thus we need a repository that can handle the retrieving of our aggregate root from the stream of events.
+     *
+     * We configure the EventSourcingRepository which does exactly this. We supply it with the event store
+     * @return {@link EventSourcingRepository}
+     */
+    @Bean
+    public EventSourcingRepository eventSourcingRepository() {
+        EventSourcingRepository eventSourcingRepository = new EventSourcingRepository(Account.class, eventStore());
+        eventSourcingRepository.setEventBus(eventBus());
+        return eventSourcingRepository;
     }
 }

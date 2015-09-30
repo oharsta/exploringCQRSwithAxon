@@ -27,10 +27,12 @@ public class AccountCreditedEventHandler {
         // Get the current states as reflected in the event
         String accountNo = event.getAccountNo();
         Double balance = event.getBalance();
+        Double amountCredited = event.getAmountCredited();
+        Double newBalance = balance + amountCredited;
 
         // Update the view
         String updateQuery = "UPDATE account_view SET balance = ? WHERE account_no = ?";
-        jdbcTemplate.update(updateQuery, new Object[]{balance, accountNo});
+        jdbcTemplate.update(updateQuery, new Object[]{newBalance, accountNo});
 
         System.out.println("Events Handled With EventMessage " + eventMessage.toString() + " at " + moment.toString());
     }

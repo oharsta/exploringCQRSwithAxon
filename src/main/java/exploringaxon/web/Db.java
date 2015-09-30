@@ -12,7 +12,9 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.util.FileSystemUtils;
 
+import java.nio.file.Paths;
 import javax.annotation.PostConstruct;
 
 /**
@@ -34,7 +36,11 @@ public class Db {
 
     @PostConstruct
     private void init(){
-        // init the tables for commands
+        // init the event store
+
+        // delete previous events on startup
+        FileSystemUtils.deleteRecursively(Paths.get("./events").toFile());
+
         TransactionTemplate transactionTmp = new TransactionTemplate(txManager);
         transactionTmp.execute(new TransactionCallbackWithoutResult() {
             @Override
