@@ -1,5 +1,7 @@
 package exploringaxon.model;
 
+import exploringaxon.api.event.AccountCreditedEvent;
+import exploringaxon.api.event.AccountDebitedEvent;
 import org.axonframework.domain.AbstractAggregateRoot;
 
 import javax.persistence.Column;
@@ -39,6 +41,17 @@ public class Account extends AbstractAggregateRoot {
         if (Double.compare(debitAmount, 0.0d) > 0 &&
                 this.balance - debitAmount > -1) {
             this.balance -= debitAmount;
+
+            /**
+             * A change in state of the Account has occurred which can be represented by an to an event: i.e.
+             * the account has been debited so an AccountDebitedEvent is created and registered.
+             *
+             * When the repository stores this change in state, it will also publish the AccountDebitedEvent
+             * to the outside world.
+             */
+            AccountDebitedEvent accountDebitedEvent = new AccountDebitedEvent(this.id, debitAmount, this.balance);
+            registerEvent(accountDebitedEvent);
+
         } else {
             throw new IllegalArgumentException("Cannot debit with the amount");
         }
@@ -55,6 +68,16 @@ public class Account extends AbstractAggregateRoot {
         if (Double.compare(creditAmount, 0.0d) > 0 &&
                 Double.compare(creditAmount, 1000000) < 0) {
             this.balance += creditAmount;
+
+            /**
+             * A change in state of the Account has occurred which can be represented by an to an event: i.e.
+             * the account has been credited so an AccountCreditedEvent is created and registered.
+             *
+             * When the repository stores this change in state, it will also publish the AccountCreditedEvent
+             * to the outside world.
+             */
+            AccountCreditedEvent accountCreditedEvent = new AccountCreditedEvent(this.id, creditAmount, this.balance);
+            registerEvent(accountCreditedEvent);
         } else {
             throw new IllegalArgumentException("Cannot credit with the amount");
         }

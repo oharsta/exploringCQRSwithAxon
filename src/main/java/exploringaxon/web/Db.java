@@ -6,6 +6,7 @@ import org.axonframework.unitofwork.DefaultUnitOfWork;
 import org.axonframework.unitofwork.UnitOfWork;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
@@ -28,8 +29,12 @@ public class Db {
     @Autowired
     private Repository repository;
 
+    @Autowired
+    private javax.sql.DataSource dataSource;
+
     @PostConstruct
     private void init(){
+        // init the tables for commands
         TransactionTemplate transactionTmp = new TransactionTemplate(txManager);
         transactionTmp.execute(new TransactionCallbackWithoutResult() {
             @Override
@@ -40,6 +45,12 @@ public class Db {
                 uow.commit();
             }
         });
+
+        // init the tables for query/view
+        JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
+        jdbcTemplate.execute("create table account_view (account_no VARCHAR , balance FLOAT )");
+        jdbcTemplate.update("insert into account_view (account_no, balance) values (?, ?)", new Object[]{"acc-one", 0.0});
+        jdbcTemplate.update("insert into account_view (account_no, balance) values (?, ?)", new Object[]{"acc-two", 0.0});
     }
 
 }
