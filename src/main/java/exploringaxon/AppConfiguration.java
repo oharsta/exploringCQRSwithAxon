@@ -2,10 +2,9 @@ package exploringaxon;
 
 import exploringaxon.model.Account;
 import org.axonframework.commandhandling.SimpleCommandBus;
-import org.axonframework.commandhandling.annotation.AnnotationCommandHandlerBeanPostProcessor;
 import org.axonframework.commandhandling.gateway.DefaultCommandGateway;
+import org.axonframework.contextsupport.spring.AnnotationDriven;
 import org.axonframework.eventhandling.SimpleEventBus;
-import org.axonframework.eventhandling.annotation.AnnotationEventListenerBeanPostProcessor;
 import org.axonframework.eventsourcing.EventSourcingRepository;
 import org.axonframework.eventstore.EventStore;
 import org.axonframework.eventstore.fs.FileSystemEventStore;
@@ -19,6 +18,7 @@ import java.io.File;
  * Created by Dadepo Aderemi.
  */
 @Configuration
+@AnnotationDriven
 public class AppConfiguration {
 
     @Bean
@@ -35,29 +35,6 @@ public class AppConfiguration {
     @Bean
     public SimpleEventBus eventBus() {
         return new SimpleEventBus();
-    }
-
-    @Bean
-    AnnotationCommandHandlerBeanPostProcessor annotationCommandHandlerBeanPostProcessor() {
-        /**
-         * The AnnotationCommandHandlerBeanPostProcessor finds all beans that has methods that has @CommandHandler
-         * and subscribed them to the commandBus with the first argument of the method being the
-         * the command type the method will be subscribed to.
-         */
-        AnnotationCommandHandlerBeanPostProcessor handler = new AnnotationCommandHandlerBeanPostProcessor();
-        handler.setCommandBus(commandBus());
-        return handler;
-    }
-
-    @Bean
-    AnnotationEventListenerBeanPostProcessor annotationEventListenerBeanPostProcessor() {
-        /**
-         * The AnnotationEventListenerBeanPostProcessor finds all beans that has methods annotated with @EventHandler
-         * and subscribe them to the eventbus.
-         */
-        AnnotationEventListenerBeanPostProcessor listener = new AnnotationEventListenerBeanPostProcessor();
-        listener.setEventBus(eventBus());
-        return listener;
     }
 
     @Bean
