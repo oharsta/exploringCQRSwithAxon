@@ -1,5 +1,9 @@
 package exploringaxon;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import exploringaxon.model.Account;
 import org.axonframework.commandhandling.SimpleCommandBus;
 import org.axonframework.commandhandling.gateway.DefaultCommandGateway;
@@ -9,6 +13,7 @@ import org.axonframework.eventsourcing.EventSourcingRepository;
 import org.axonframework.eventstore.EventStore;
 import org.axonframework.eventstore.fs.FileSystemEventStore;
 import org.axonframework.eventstore.fs.SimpleEventFileResolver;
+import org.axonframework.serializer.json.JacksonSerializer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -54,7 +59,16 @@ public class AppConfiguration {
      */
     @Bean
     public EventStore eventStore() {
-        EventStore eventStore = new FileSystemEventStore(new SimpleEventFileResolver(new File("./events")));
+        ObjectMapper mapper = new ObjectMapper();
+
+        // Avoid having to annotate the Person class
+        // Requires Java 8, pass -parameters to javac
+        // and jackson-module-parameter-names as a dependency
+        mapper.registerModule(new ParameterNamesModule());
+
+        // make private fields of Person visible to Jackson
+        mapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
+        EventStore eventStore = new FileSystemEventStore(new JacksonSerializer(mapper), new SimpleEventFileResolver(new File("./events")));
         return eventStore;
     }
 
